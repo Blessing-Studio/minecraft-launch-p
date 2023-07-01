@@ -1,1 +1,1 @@
-# MinecraftLaunch.python
+# MinecraftLaunch-p
