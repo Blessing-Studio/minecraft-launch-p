@@ -3,7 +3,7 @@ import webbrowser
 from json import loads, dumps
 
 
-
+# 还没写完，懒得写了doge,先咕咕一阵罢
 def OAuth():
     # 重定向
     webbrowser.open("https://login.live.com/oauth20_authorize.srf\
