@@ -1,18 +1,18 @@
 from os import remove, system
 from Modules.AgumentsBuilders.JavaMinecraftArgumentsBuilder import JavaMinecraftArgumentsBuilder
 from Modules.Models.Launch.LaunchConfig import LaunchConfig
-from Modules.Toolkits.GameCoreTookit import GameCoreTookit
+from Modules.Toolkits.GameCoreToolkit import GameCoreToolkit
 
 
 class JavaMinecraftLauncher():
-    def __init__(self, launchSetting: LaunchConfig, gameCoreTookit: GameCoreTookit, EnableIndependencyCore = False):
+    def __init__(self, launchSetting: LaunchConfig, gameCoreToolkit: GameCoreToolkit, EnableIndependencyCore = False):
         self.LaunchSetting = launchSetting
-        self.GameCoreTookit = gameCoreTookit
+        self.GameCoreToolkit = gameCoreToolkit
         self.EnableIndpendencyCore = EnableIndependencyCore
 
     def LaunchTaskAsync(self, id: str):
         javaMinecraftLauncher = JavaMinecraftArgumentsBuilder(
-            self.GameCoreTookit.mcDir,
+            self.GameCoreToolkit.Root,
             id, 
             self.LaunchSetting.JvmConfig[0], 
             self.LaunchSetting.JvmConfig[1], 
