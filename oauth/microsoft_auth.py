@@ -4,7 +4,7 @@ from json import loads, dumps
 
 
 
-def OAuth():
+def oauth():
     # 重定向
     webbrowser.open("https://login.live.com/oauth20_authorize.srf\
     ?client_id=00000000402b5328\
@@ -77,5 +77,3 @@ def OAuth():
     url = "https://api.minecraftservices.com/authentication/login_with_xbox"
     res = post(url = url, data = data)
     print(res.text)
-
-OAuth()

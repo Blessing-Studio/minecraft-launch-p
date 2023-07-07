@@ -25,7 +25,7 @@ class JavaMinecraftArgumentsBuilder():
         else:
             return False
 
-    def Launch(self) -> str:
+    def build(self) -> str:
         commandLine = str("")
         JVM = str("")
         classPath = str("")
