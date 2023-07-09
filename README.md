@@ -1,2 +1,2 @@
 # minecraft-launch-p
-  A Minecraft launcher core for python.
+  A Minecraft launcher core for Python.
