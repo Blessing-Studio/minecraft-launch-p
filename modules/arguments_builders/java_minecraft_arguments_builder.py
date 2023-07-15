@@ -7,14 +7,16 @@ import zipfile
 
 class JavaMinecraftArgumentsBuilder():
     # new __init__
-    def __init__(self, game_core: GameCore, launch_config: LaunchConfig):
-        self.path = game_core.root
+    def __init__(self, game_core: GameCore, launch_config: LaunchConfig) -> None:
+        self.game_core = game_core
+        self.launch_config = launch_config
+        '''self.path = game_core.root
         self.version = game_core.id
         self.javawpath = launch_config.jvm_config[0] 
         self.max_memory = launch_config.jvm_config[1] 
         self.user_name = launch_config.account
         self.width = launch_config.game_window_config[0] 
-        self.height = launch_config.game_window_config[1]
+        self.height = launch_config.game_window_config[1]'''
 
     # old __init__，暂时先不改     
     def __init__(self, path: str, version: str, javaw_path: str, max_memory: str, user_name: str, width: str, height: str):
@@ -26,23 +28,23 @@ class JavaMinecraftArgumentsBuilder():
         self.width = width
         self.height = height
 
-    def unpress(self, name: str, path: str):
+    def unpress(self, name: str, path: str) -> None:
         zip = zipfile.ZipFile(name)
         for z in zip.namelist():
             zip.extract(z, path)
         zip.close()
 
-    def is_my_version(self, version: str, path: str):
+    def is_my_version(self, version: str, path: str) -> bool:
         if (exists(f"{path}\\versions\\{version}\\{version}.json")):
             return True
         else:
             return False
 
     def build(self) -> str:
-        command_line = str("")
-        JVM = str("")
-        class_path = str("")
-        mc_args = str("")
+        command_line: str
+        jvm: str
+        class_path: str
+        mc_args: str
 
         if ((not self.javaw_path == "")
                 and (not self.version == "")
@@ -52,7 +54,7 @@ class JavaMinecraftArgumentsBuilder():
             if (self.is_my_version(self.version, self.path)):
                 json = open(
                     f"{self.path}\\versions\\{self.version}\\{self.version}.json", "r")
-                dic = loads(json.read())
+                dic: dict = loads(json.read())
                 json.close()
                 for lib in dic["libraries"]:
                     if "classifiers" in lib['downloads']:
@@ -71,8 +73,8 @@ class JavaMinecraftArgumentsBuilder():
                                     try:
                                         self.unpress(filePath, path)
                                     except:
-                                        pass
-                JVM = '"' + self.javaw_path + '" -XX:+UseG1GC -XX:-UseAdaptiveSizePolicy' +\
+                                        ...
+                jvm = '"' + self.javaw_path + '" -XX:+UseG1GC -XX:-UseAdaptiveSizePolicy' +\
                     ' -XX:-OmitStackTraceInFastThrow -Dfml.ignoreInvalidMinecraftCertificates=True ' +\
                     '-Dfml.ignorePatchDiscrepancies=True -Dlog4j2.formatMsgNoLookups=true ' +\
                     '-XX:HeapDumpPath=MojangTricksIntelDriversForPerformance_javaw.exe_minecraft.exe.heapdump ' +\
@@ -86,7 +88,7 @@ class JavaMinecraftArgumentsBuilder():
                         normal = f'{self.path}\\libraries\\{lib["downloads"]["artifact"]["path"]}'
                         class_path += normal + ";"
                 class_path = f'{class_path}{self.path}\\versions\\{self.version}\\{self.version}.jar"'
-                JVM = f"{JVM} {class_path} -Xmx{self.max_memory} -Xmn256m -Dlog4j.formatMsgNoLookups=true"
+                jvm = f"{jvm} {class_path} -Xmx{self.max_memory} -Xmn256m -Dlog4j.formatMsgNoLookups=true"
 
                 mc_args += dic["mainClass"] + " "
                 if "minecraftArguments" in dic:
@@ -153,5 +155,5 @@ class JavaMinecraftArgumentsBuilder():
                         "${resolution_height}", self.height)  # 窗口高度
                     mc_args = mc_args.replace("-demo ", "")  # 去掉-demo参数，退出试玩版
 
-                command_line = JVM + " " + mc_args
+                command_line = jvm + " " + mc_args
                 return command_line
