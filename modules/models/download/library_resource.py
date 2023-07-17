@@ -1,8 +1,9 @@
 class LibraryResource():
-    root: str
-    check_sum: str
-    size: int
-    url: str
-    name: str
-    is_enable: bool
-    is_natives: bool
+    def __init__(self):
+        self.root: str
+        self. check_sum: str
+        self.size: int
+        self.url: str
+        self.name: str
+        self.is_enable: bool
+        self.is_natives: bool

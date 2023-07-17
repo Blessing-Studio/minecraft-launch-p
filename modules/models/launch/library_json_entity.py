@@ -3,10 +3,11 @@ from modules.models.launch.rule_entity import RuleEntity
 
 
 class LibraryJsonEntity():
-    downloads: DownloadsJsonEntity
-    name: str
-    url: str
-    natives: dict[str, str]
-    rules: list[RuleEntity]
-    check_sum: list[str]
-    client_req: bool
+    def __init__(self): 
+        self.downloads: DownloadsJsonEntity
+        self.name: str
+        self.url: str
+        self.natives: dict[str, str]
+        self.rules: list[RuleEntity]
+        self.check_sum: list[str]
+        self.client_req: bool

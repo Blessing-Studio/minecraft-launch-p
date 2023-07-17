@@ -1,3 +1,4 @@
 class RuleEntity():
-    action: str
-    system: dict[str, str]
+    def __init__(self):
+        self.action: str
+        self.system: dict[str, str]

@@ -1,6 +1,7 @@
 class FileJsonEntity():
-    path: str
-    sha1: str
-    size: int
-    url: str
-    id: str
+    def __init__(self):
+        self.path: str
+        self.sha1: str
+        self.size: int
+        self.url: str
+        self.id: str

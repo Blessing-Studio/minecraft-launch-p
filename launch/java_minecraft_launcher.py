@@ -1,10 +1,11 @@
 from os import remove, system
 import platform
 from modules.arguments_builders.java_minecraft_arguments_builder import JavaMinecraftArgumentsBuilder
+from modules.models.launch.game_core import GameCore
 from modules.models.launch.launch_config import LaunchConfig
 from modules.toolkits.game_core_toolkit import GameCoreToolkit
 
-
+# 咕咕ing
 class JavaMinecraftLauncher():
     def __init__(self, launch_setting: LaunchConfig, game_core_toolkit: GameCoreToolkit, enable_independency_core: bool = False):
         self.launch_setting = launch_setting
@@ -12,6 +13,9 @@ class JavaMinecraftLauncher():
         self.enable_indpendency_core = enable_independency_core
 
     def launch_task_async(self, id: str):
+        args: list[str] = []
+        core: GameCore = GameCoreToolkit.get_game_core(id)
+
         __system_dict = {"Windows": ".bat", "Mac": ".sh", "Linux": ".sh"}
         arguments_builder = JavaMinecraftArgumentsBuilder(
             self.game_core_toolkit.root,

@@ -1,3 +1,4 @@
 class JavaVersionJsonEntity():
-    componet: str
-    major_version: int
+    def __init__(self):
+        self.componet: str
+        self.major_version: int

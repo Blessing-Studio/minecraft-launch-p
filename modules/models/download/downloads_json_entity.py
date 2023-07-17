@@ -2,5 +2,6 @@ from modules.models.launch.file_json_entity import FileJsonEntity
 
 
 class DownloadsJsonEntity():
-    artifact: FileJsonEntity
-    classifiers: dict[str, FileJsonEntity]
+    def __init__(self):
+        self.artifact: FileJsonEntity
+        self.classifiers: dict[str, FileJsonEntity]

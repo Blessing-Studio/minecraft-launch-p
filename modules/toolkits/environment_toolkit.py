@@ -10,7 +10,7 @@ class EnvironmentToolkit():
     is_windows: bool = True if platform.system() == "Windows" else False
 
     @staticmethod
-    def get_platform_name():
+    def get_platform_name() -> str:
         if(platform.system() == "Mac"):
             return "osx"
         if(platform.system() == "Linux"):
