@@ -7,7 +7,8 @@
 
 <h3><div>给Python开发者的全能、模块化的Minecraft启动核心</div></h3>
 <h3>An almighty and modular Minecraft launcher core for Python developers.</h3>
---------------------------------------------------------------
+
+-------------------------------------------------------------
 
 ### 简介
 
