@@ -3,64 +3,71 @@ from json import loads
 from modules.enum.mod_loader_type import ModLoaderType
 from modules.models.download.api_manager import APIManager
 from modules.models.download.file_resource import FileResource
-from modules.models.launch.arguments_json_entity import ArgumentsJsonEntity
-from modules.models.launch.game_core_json_entity import GameCoreJsonEntity
 from modules.models.launch.game_core import GameCore
-from library_parser import LibraryParser
-from os.path import basename
-from os import stat
-
+from modules.parser.library_parser import LibraryParser
+from os.path import basename, abspath
 from modules.models.launch.mod_loader_info import ModLoaderInfo
 
+
 class GameCoreParser(): 
-    def __init__(self, root: str, json_entities: list[GameCoreJsonEntity]) -> None:
-        self.root = root
+    def __init__(self, root: str, json_entities: list[dict]) -> None:
+        self.root = abspath(root)
         self.json_entities = json_entities
         self.error_game_cores: list[(str, Exception)] = []
 
     def get_game_cores(self) -> list[GameCore]:
         cores: list[GameCore] = []
         for json_entity in self.json_entities:
-            try:
+            # try:
                 game_core: GameCore = GameCore()
-                game_core.id = json_entity.id
-                game_core.type = json_entity.type
-                game_core.main_class = json_entity.main_class
-                game_core.inherits_form = json_entity.inherits_form
-                game_core.java_version = json_entity.java_version.major_version
-                game_core.library_resources = list(LibraryParser(json_entity.libraries, self.root).get_libraries())
+                game_core.id = json_entity['id']
+                game_core.type = json_entity['type']
                 game_core.root = self.root
+                game_core.main_class = json_entity['mainClass']
+                try:
+                    game_core.inherits_from = json_entity['inheritsFrom']
+                except:
+                    ...
+                try:
+                    game_core.java_version = json_entity['javaVersion']['majorVersion']
+                except:
+                    ...
+                game_core.library_resources = list(LibraryParser(json_entity['libraries'], self.root).get_libraries())
 
-                if((json_entity.inherits_form == None)|(json_entity.inherits_form == ""))&(json_entity.downloads != None):
+                if(not 'inheritsFrom' in json_entity)&('downloads' in json_entity):
                     game_core.client_file =  self.__get_client_file(json_entity)
 
-                if((json_entity.inherits_form == None)|(json_entity.inherits_form == ""))&(json_entity.logging != None)&(json_entity.logging.client != None):
-                    game_core.log_config_file = self.__get_log_config_file(json_entity)
+                if(not 'inheritsFrom' in json_entity)&('logging' in json_entity):
+                    if('client' in json_entity['logging']):
+                        game_core.log_config_file = self.__get_log_config_file(json_entity)
 
-                if((json_entity.inherits_form == None)|(json_entity.inherits_form == ""))&(json_entity.assets_index != None):
+                if(not 'inheritsFrom' in json_entity)&('assetIndex' in json_entity):
                     game_core.assets_index_file = self.__get_assets_index_file(json_entity)
 
-                if(json_entity.minecraft_arguments != None):
-                    game_core.behind_arguments = self.__handle_minecraft_arguments(json_entity.minecraft_arguments)
+                if('minecraftArguments' in json_entity):
+                    game_core.behind_arguments = json_entity['minecraftArguments'].split(" ")
 
-                if(json_entity.arguments != None)&(json_entity.arguments.game != None):
-                    behind_arguments: list[str]
-                    if(game_core.behind_arguments != None):
-                        behind_arguments = list(set(game_core.behind_arguments).union(set(self.__handle_arguments_game(json_entity.arguments))))
+                if('arguments' in json_entity):
+                    if('games' in json_entity['arguments']):
+                        behind_arguments: list[str]
+                        if(game_core.behind_arguments != None):
+                            behind_arguments = list(set(game_core.behind_arguments).union(set(self.__handle_arguments_game(json_entity['arguments']))))
+                        else:
+                            enumerable: list[str] = self.__handle_arguments_game(json_entity['arguments'])
+                            behind_arguments = enumerable
+                        game_core.behind_arguments = behind_arguments
+
+                if('arguments' in json_entity):
+                    if('jvm' in json_entity['arguments']):
+                        game_core.front_arguments = self.__handle_arguments_jvm(json_entity['arguments'])
                     else:
-                        enumerable: list[str] = self.__handle_arguments_game(json_entity.arguments)
-                        behind_arguments = enumerable
-                    game_core.behind_arguments = behind_arguments
-
-                if(json_entity.arguments != None & json_entity.arguments.jvm != None):
-                    game_core.front_arguments = self.__handle_arguments_jvm(json_entity.arguments)
+                        game_core.front_arguments = ["-Djava.library.path=${natives_directory}", "-Dminecraft.launcher.brand=${launcher_name}", "-Dminecraft.launcher.version=${launcher_version}", "-cp ${classpath}"]
                 else:
                     game_core.front_arguments = ["-Djava.library.path=${natives_directory}", "-Dminecraft.launcher.brand=${launcher_name}", "-Dminecraft.launcher.version=${launcher_version}", "-cp ${classpath}"]
                 
                 cores.append(game_core)
-                item = Exception()
-            except item:
-                self.error_game_cores.append((json_entity.id, item))
+            # except Exception as item:
+              #  self.error_game_cores.append((json_entity.id, item))
         
         for item2 in cores:
             item2.source = self.__get_source(item2)
@@ -69,56 +76,56 @@ class GameCoreParser():
             if(item2.has_mod_loader):
                 item2.mod_loader_infos = self.__get_mod_loader_infos(item2)
 
-            if(item2.inherits_form == None | item2.inherits_form == ""):
+            if(item2.inherits_from == None):
                 yield item2
                 continue
             game_core2: GameCore = GameCore()
             for item3 in cores:
-                if(item3.id == item2.inherits_form):
+                if(item3.id == item2.inherits_from):
                     game_core2 = item3
             
             if(game_core2 != None):
                 yield self.__combine(item2, game_core2)
 
-    def __get_client_file(self, entity: GameCoreJsonEntity) -> FileResource:
-        text: str = f"{self.root}\\versions\\{entity.id}\\{entity.id}.jar"
+    def __get_client_file(self, entity: dict) -> FileResource:
+        text: str = f"{self.root}\\versions\\{entity['id']}\\{entity['id']}.jar"
         return FileResource(
-            check_sum = entity.downloads["client"].sha1,
-            size = entity.downloads["size"].size,
-            url = entity.downloads["client"].url.replace("https://launcher.mojang.com", APIManager.current.host) if APIManager.current != APIManager.mojang else entity.downloads["client"].url,
+            check_sum = entity['downloads']["client"]['sha1'],
+            size = entity['downloads']['client']['size'],
+            url = entity['downloads']["client"]['url'].replace("https://launcher.mojang.com", APIManager.current.host) if APIManager.current != APIManager.mojang else entity.downloads["client"].url,
             root = self.root,
-            file_info = stat(text),
+            file_info = text,
             name = basename(text)
         )
 
-    def __get_log_config_file(self, entity: GameCoreJsonEntity) -> FileResource:
-        mid = entity.logging.client.file.url
-        file_name: str = f"{self.root}\\versions\\{entity.id}\\{entity.logging.client.file.id if entity.logging.client.file.id != None else basename(mid)}"
+    def __get_log_config_file(self, entity: dict) -> FileResource:
+        mid = entity['logging']['client']['file']['url']
+        file_name: str = f"{self.root}\\versions\\{entity['id']}\\{entity['logging']['client']['file']['id'] if entity['logging']['client']['file']['id'] != None else basename(mid)}"
         return FileResource(
-            check_sum = entity.logging.client.file.sha1,
-			size = entity.logging.client.file.size,
-			url = entity.logging.client.file.url.replace("https://launcher.mojang.com", APIManager.current.host) if APIManager.current != APIManager.mojang else entity.logging.client.file.url,
-			name = entity.logging.client.file.id,
-			file_info = stat(file_name),
+            check_sum = entity['logging']['client']['file']['sha1'],
+			size = entity['logging']['client']['file']['size'],
+			url = entity['logging']['client']['file']['url'].replace("https://launcher.mojang.com", APIManager.current.host) if APIManager.current != APIManager.mojang else entity['logging']['client']['file']['url'],
+			name = entity['logging']['client']['file']['id'],
+			file_info = file_name,
 			root = self.root
         )
     
-    def __get_assets_index_file(self, entity: GameCoreJsonEntity) -> FileResource:
-        file_name: str = f"{self.root}\\assets\\indexes\\{entity.assets_index.id}.json"
+    def __get_assets_index_file(self, entity: dict) -> FileResource:
+        file_name: str = f"{self.root}\\assets\\indexes\\{entity['assetIndex']['id']}.json"
         return FileResource(
-            check_sum = entity.assets_index.sha1,
-			size = entity.assets_index.size,
-			url = entity.assets_index.url.replace("https://launchermeta.mojang.com", APIManager.current.host).replace("https://piston-meta.mojang.com", APIManager.current.host) if APIManager.current != APIManager.mojang else entity.assets_index.url,
-			name = f"{entity.assets_index.id}.json",
-			fileInfo = stat(file_name),
+            check_sum = entity['assetIndex']['sha1'],
+			size = entity['assetIndex']['size'],
+			url = (entity['assetIndex']['url'].replace("https://launchermeta.mojang.com", APIManager.current.host) if "https://launchermeta.mojang.com" in entity["assetIndex"]["url"] else entity["assetIndex"]["url"].replace("https://piston-meta.mojang.com", APIManager.current.host)) if APIManager.current != APIManager.mojang else entity['assetIndex']['url'],
+			name = f"{entity['assetIndex']['id']}.json",
+			file_info = file_name,
 			root = self.root
         )
     
     def __get_source(self, core: GameCore) ->str:
         try:
             path: str = f'{core.root}\\versions\\{core.id}\\{core.id}.json'
-            if(core.inherits_form != None):
-                return core.inherits_form
+            if(core.inherits_from != None):
+                return core.inherits_from
             if(exists(path)):
                 json = open(path)
                 jobject = loads(json.read())
@@ -183,28 +190,31 @@ class GameCoreParser():
 
     
     def __handle_minecraft_arguments(self, minecraft_arguments: str) -> list[str]:
-        return self.__arguments_group(minecraft_arguments.replace("  ", " ").split(' '))
+        return GameCoreParser.__arguments_group(minecraft_arguments.replace("  ", " ").split(" "))
     
-    def __handle_arguments_game(self, entity: ArgumentsJsonEntity) -> list[str]:
-        return self.__arguments_group(vs = [ i for i in entity.game if i is str] )
+    def __handle_arguments_game(self, entity: dict) -> list[str]:
+        return GameCoreParser.__arguments_group(vs = [ i for i in entity['game'] if type(i) == str] )
     
-    def __handle_arguments_jvm(self, entity: ArgumentsJsonEntity) -> list[str]:
-        return self.__arguments_group(vs = [ i for i in entity.jvm if i is str] )
+    def __handle_arguments_jvm(self, entity: dict) -> list[str]:
+        return GameCoreParser.__arguments_group(vs = [ i for i in entity['jvm'] if type(i) == str] )
     
     @staticmethod
     def __arguments_group(vs: list[str]) -> list[str]:
         cache: list[str] = []
+        res: list = []
         for item in vs:
-            if(any(cache) & cache[0].startswith("-") & item.startswith("-")):
-                yield cache[0].strip(' ')
-                cache = [item]
+            if(any(cache)):
+                if (cache[0].startswith("-") & item.startswith("-")):
+                    res.append(cache[0].strip(' '))
+                    cache = [item]
             elif(vs[-1] == item)&(not any(cache)):
-                yield item.strip(' ')
+                res.append(item.strip(' '))
             else:
                 cache.append(item)
             if(len(cache) == 2):
-                yield str.join(" ", cache).strip(' ')
+                res.append(str.join(" ", cache).strip(' '))
                 cache = []
+            return res
 
     def __combine(self, raw: GameCore, inherits_from: GameCore) -> GameCore:
         raw.assets_index_file = inherits_from.assets_index_file

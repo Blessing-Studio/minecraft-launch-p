@@ -1,34 +1,30 @@
-from os.path import exists
-from json import loads
+from os.path import exists, basename
+import platform
+from modules.models.download.library_resource import LibraryResource
 from modules.models.launch.game_core import GameCore
 from modules.models.launch.launch_config import LaunchConfig
-import zipfile
+import os
+from modules.utils.environment_util import EnvironmentUtil
+from modules.utils.extend_util import ExtendUtil
 
 
 class JavaMinecraftArgumentsBuilder():
-    # new __init__
+    default_gc_arguments: list[str] = ["-XX:+UseG1GC", "-XX:+UnlockExperimentalVMOptions", "-XX:G1NewSizePercent=20", "-XX:G1ReservePercent=20", "-XX:MaxGCPauseMillis=50", "-XX:G1HeapRegionSize=16m", "-XX:-UseAdaptiveSizePolicy"]
+    default_advanced_arguments: list[str] = ["-XX:-OmitStackTraceInFastThrow", "-XX:-DontCompileHugeMethods", "-Dfile.encoding=GB18030", "-Dfml.ignoreInvalidMinecraftCertificates=true", "-Dfml.ignorePatchDiscrepancies=true", "-Djava.rmi.server.useCodebaseOnly=true", "-Dcom.sun.jndi.rmi.object.trustURLCodebase=false", "-Dcom.sun.jndi.cosnaming.object.trustURLCodebase=false"]
+
     def __init__(self, game_core: GameCore, launch_config: LaunchConfig) -> None:
         self.game_core = game_core
         self.launch_config = launch_config
+
         '''self.path = game_core.root
         self.version = game_core.id
-        self.javawpath = launch_config.jvm_config[0] 
-        self.max_memory = launch_config.jvm_config[1] 
-        self.user_name = launch_config.account
-        self.width = launch_config.game_window_config[0] 
-        self.height = launch_config.game_window_config[1]'''
+        self.javaw_path = launch_config.jvm_config.java_path
+        self.max_memory = f'{launch_config.jvm_config.max_memory}m' 
+        self.user_name = launch_config.account.name
+        self.width = launch_config.game_window_config.width
+        self.height = launch_config.game_window_config.height'''
 
-    # old __init__，暂时先不改     
-    def __init__(self, path: str, version: str, javaw_path: str, max_memory: str, user_name: str, width: str, height: str):
-        self.path = path
-        self.version = version
-        self.javaw_path = javaw_path
-        self.max_memory = max_memory
-        self.user_name = user_name
-        self.width = width
-        self.height = height
-
-    def unpress(self, name: str, path: str) -> None:
+    '''def unpress(self, name: str, path: str) -> None:
         zip = zipfile.ZipFile(name)
         for z in zip.namelist():
             zip.extract(z, path)
@@ -43,8 +39,8 @@ class JavaMinecraftArgumentsBuilder():
     def build(self) -> str:
         command_line: str
         jvm: str
-        class_path: str
-        mc_args: str
+        class_path: str = ""
+        mc_args: str = ""
 
         if ((not self.javaw_path == "")
                 and (not self.version == "")
@@ -100,7 +96,7 @@ class JavaMinecraftArgumentsBuilder():
                     mc_args = mc_args.replace(
                         "${game_directory}", self.path)  # mc路径
                     mc_args = mc_args.replace(
-                        "${assets_root}", self.path + "\\assets")  # 资源文件路径
+                        "${assets_root}", f'{self.path}\\assets')  # 资源文件路径
                     mc_args = mc_args.replace(
                         "${assets_index_name}", dic["assetIndex"]["id"])  # 资源索引文件名称
                     mc_args = mc_args.replace(
@@ -150,10 +146,120 @@ class JavaMinecraftArgumentsBuilder():
                     mc_args = mc_args.replace(
                         "${version_type}", dic["type"])  # 版本类型
                     mc_args = mc_args.replace(
-                        "${resolution_width}", self.width)  # 窗口宽度
+                        "${resolution_width}", str(self.width))  # 窗口宽度
                     mc_args = mc_args.replace(
-                        "${resolution_height}", self.height)  # 窗口高度
+                        "${resolution_height}", str(self.height))  # 窗口高度
                     mc_args = mc_args.replace("-demo ", "")  # 去掉-demo参数，退出试玩版
 
                 command_line = jvm + " " + mc_args
-                return command_line
+                return command_line'''
+            
+    def build(self) -> list[str]:
+        yield f'"{self.launch_config.jvm_config.java_path}"'
+
+        for front_arguments in self.get_front_arguments():
+            yield front_arguments
+
+        yield self.game_core.main_class
+
+        for behind_arguments in self.get_behind_arguments():
+            yield behind_arguments
+
+    def get_behind_arguments(self) -> list[str]:
+        key_value_pairs: dict[str, str] = {
+            "${auth_player_name}": self.launch_config.account.name,
+            "${version_name}": self.game_core.id,
+            "${assets_root}": f'{self.game_core.root}\\assets',
+            "${assets_index_name}": basename(self.game_core.assets_index_file.file_info).replace(".json", ""),
+            "${auth_uuid}": self.launch_config.account.uuid.hex,
+            "${auth_access_token}": self.launch_config.account.access_token,
+            "${user_type}": "Mojang" ,
+            "${version_type}":  self.game_core.type,
+            "${user_properties}": "{}",
+            "${game_assets}": f"{self.game_core.root}\\assets",
+            "${auth_session}": self.launch_config.account.access_token,
+			"${game_directory}": f"{self.game_core.root}\\versions\\{self.game_core.id}" if self.launch_config.is_enable_independency_core else self.game_core.root
+        }
+
+        List: list[str] = self.game_core.behind_arguments
+
+        if(self.launch_config.game_window_config != None):
+            List.append(f"--width {self.launch_config.game_window_config.width}")
+            List.append(f"--height {self.launch_config.game_window_config.height}")
+            if(self.launch_config.game_window_config.is_full_screen):
+                List.append("--fullscreen")
+
+        if(self.launch_config.server_config != None):
+            if(self.launch_config.server_config.ip != None & self.launch_config.server_config.ip != "")&(self.launch_config.server_config.port != 0):
+                List.append(f"--server {self.launch_config.server_config.ip}")
+                List.append(f"--port {self.launch_config.server_config.port}")
+
+        for item in List:
+            yield ExtendUtil.replace(item, key_value_pairs)
+        
+    def get_front_arguments(self) -> list[str]:
+        key_value_pairs: dict[str, str] = {
+            "${launcher_name}": "minecraft-launch-p",
+            "${launcher_version}": "3",
+            "${classpath_separator}": os.sep,
+            "${classpath}": self.__get_classpath(),
+            "${client}": self.game_core.client_file.file_info,
+            "${min_memory}": str(self.launch_config.jvm_config.min_memory),
+            "${max_memory}": str(self.launch_config.jvm_config.max_memory),
+            "${library_directory}": f"{self.game_core.root}\\libraries",
+            "${version_name}": self.game_core.id if self.game_core.inherits_from == None or self.game_core.inherits_from == "" else self.game_core.inherits_from,           
+            "${natives_directory}": self.launch_config.natives_folder if self.launch_config.natives_folder != None and exists(self.launch_config.natives_folder) else f"{self.game_core.root}\\versions\\{self.game_core.id}\\natives",
+            }
+        
+        if(not exists(key_value_pairs["${natives_directory}"])):
+            os.makedirs(key_value_pairs["${natives_directory}"].strip('"'))
+        
+        args: list[str] = [ "-Xmn${min_memory}m", "-Xmx${max_memory}m", "-Dminecraft.client.jar=${client}"]
+
+        for item in self.__get_environment_jvm_arguments():
+            args.append(item)
+
+        if(self.launch_config.jvm_config.gc_arguments == None):
+            for x in self.default_gc_arguments:
+                args.append(x)
+        else:
+            for x in self.launch_config.jvm_config.gc_arguments:
+                args.append(x)
+        
+        if(self.launch_config.jvm_config.advanced_arguments == None):
+            for x in self.default_advanced_arguments:
+                args.append(x)
+        else:
+            for x in self.launch_config.jvm_config.advanced_arguments:
+                args.append(x)
+
+        args.append("-Dlog4j2.formatMsgNoLookups=true")
+        for item3 in self.game_core.front_arguments:
+            args.append(item3)
+
+        for item2 in args:
+            yield ExtendUtil.replace(item2, key_value_pairs)
+
+
+    def __get_classpath(self) -> str:
+        loads = []
+        for x in self.game_core.library_resources:
+            if(x.is_enable)&(not x.is_natives):
+                loads.append(x)
+        loads.append(self.game_core.client_file)
+        __loads = [x.to_file_info() for x in loads]
+        return str.join(";", __loads)
+    
+    @staticmethod
+    def __get_environment_jvm_arguments() -> list[str]:
+        platform_name: str = EnvironmentUtil.get_platform_name()
+        if(not platform_name == "windows"):
+            if(platform_name == "osx"):
+                yield  "-XstartOnFirstThread"
+        else:
+            yield "-XX:HeapDumpPath=MojangTricksIntelDriversForPerformance_javaw.exe_minecraft.exe.heapdump"
+            if("10.0" in platform.version()):
+                yield "-Dos.name=\"Windows 10\""
+                yield "-Dos.version=10.0"
+        if(EnvironmentUtil.arch == "32"):
+            yield "-Xss1M"

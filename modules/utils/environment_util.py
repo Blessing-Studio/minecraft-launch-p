@@ -1,7 +1,7 @@
 import platform
 
 
-class EnvironmentToolkit():
+class EnvironmentUtil():
     (bit, linkage) = platform.architecture()
     arch: str = "64" if bit == "64bit" else "32"
 
@@ -11,11 +11,10 @@ class EnvironmentToolkit():
 
     @staticmethod
     def get_platform_name() -> str:
-        if(platform.system() == "Mac"):
+        if(platform.system() == "Darwin"):
             return "osx"
         if(platform.system() == "Linux"):
             return "linux"
         if(platform.system() == "Windows"):
             return "windows"
         return "unknown"
-        

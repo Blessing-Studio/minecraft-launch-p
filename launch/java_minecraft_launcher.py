@@ -1,34 +1,33 @@
-from os import remove, system
+from os import remove, system, makedirs
 import platform
 from modules.arguments_builders.java_minecraft_arguments_builder import JavaMinecraftArgumentsBuilder
+from modules.interface.launch_base import LaunchBase
 from modules.models.launch.game_core import GameCore
 from modules.models.launch.launch_config import LaunchConfig
-from modules.toolkits.game_core_toolkit import GameCoreToolkit
+from modules.models.launch.minecraft_launch_response import MinecraftLaunchResponse
+from modules.utils.game_core_util import GameCoreUtil
 
-# 咕咕ing
-class JavaMinecraftLauncher():
-    def __init__(self, launch_setting: LaunchConfig, game_core_toolkit: GameCoreToolkit, enable_independency_core: bool = False):
+
+class JavaMinecraftLauncher(LaunchBase[JavaMinecraftArgumentsBuilder, MinecraftLaunchResponse]):
+    def __init__(self, launch_setting: LaunchConfig, game_core_toolkit: GameCoreUtil):
         self.launch_setting = launch_setting
         self.game_core_toolkit = game_core_toolkit
-        self.enable_indpendency_core = enable_independency_core
 
     def launch_task_async(self, id: str):
-        args: list[str] = []
-        core: GameCore = GameCoreToolkit.get_game_core(id)
+        makedirs("MLP\\shell")
 
-        __system_dict = {"Windows": ".bat", "Mac": ".sh", "Linux": ".sh"}
+        core: GameCore = self.game_core_toolkit.get_game_core(id)
+
+        __system_dict = {"Windows": ".bat", "Darwin": ".sh", "Linux": ".sh"}
         arguments_builder = JavaMinecraftArgumentsBuilder(
-            self.game_core_toolkit.root,
-            id, 
-            self.launch_setting.jvm_config[0], 
-            self.launch_setting.jvm_config[1], 
-            self.launch_setting.account, 
-            self.launch_setting.game_window_config[0], 
-            self.launch_setting.game_window_config[1])
+            core,
+            self.launch_setting
+            )
 
-        __shell = f"run{__system_dict[platform.system()]}"
+        __shell = f"MLP\\shell\\launch{__system_dict[platform.system()]}"
+        args = arguments_builder.build()
         bat = open(__shell, "w")
-        bat.write(arguments_builder.build())
+        bat.write(str.join(" ", args))
         bat.close()
         system(__shell)
         remove(__shell)

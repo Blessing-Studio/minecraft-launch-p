@@ -1,14 +1,13 @@
 from json import loads
-from os.path import exists
+from os.path import exists, abspath
 from os import makedirs, listdir
 from modules.models.launch.game_core import GameCore
-from modules.models.launch.game_core_json_entity import GameCoreJsonEntity
 from modules.parser.game_core_parser import GameCoreParser
 
 
-class GameCoreToolkit():
+class GameCoreUtil():
     def __init__(self, path: str = ".minecraft"):
-        self.root = path
+        self.root = abspath(path)
         self.error_game_cores: list[(str, Exception)]
 
     def get_game_core(self, id: str) -> GameCore:
@@ -19,7 +18,7 @@ class GameCoreToolkit():
         return None
     
     def get_geme_cores(self) -> list[GameCore]:
-        entities: list[GameCoreJsonEntity] = []
+        entities: list[dict] = []
         versions_folder: str = f"{self.root}\\versions"
         if (not exists(versions_folder)):
             makedirs(versions_folder)
@@ -28,17 +27,17 @@ class GameCoreToolkit():
         directories: list[str] = listdir(versions_folder)
         for item in directories:
             files2: list[str] = listdir(f"{versions_folder}\\{item}")
-            for files in files2:
-                if(files == f"{item}.json"):
-                    entity: GameCoreJsonEntity = GameCoreJsonEntity()
+            for file in files2:
+                if(file == f"{item}.json"):
+                    entity: dict = {}
                     try:
-                        json_files = open(files)
-                        entity = loads(json_files.read())
-                        json_files.close()
+                        json_file = open(f"{self.root}\\versions\\{item}\\{file}")
+                        entity = loads(json_file.read())
+                        json_file.close()
                         entities.append(entity)
                     except:
-                        ...
+                       ...
         parser: GameCoreParser = GameCoreParser(self.root, entities)
-        game_cores: list[GameCore] = parser.get_game_cores
+        game_cores: list[GameCore] = parser.get_game_cores()
         self.error_game_cores = parser.error_game_cores
         return game_cores

@@ -9,13 +9,13 @@ class GameCore():
         self.root: str
         self.type: str
         self.main_class: str
-        self.inherits_form: str
+        self.inherits_from: str = None
         self.java_version: int
         self.library_resources: list[LibraryResource]
         self.client_file: FileResource
         self.log_config_file: FileResource
         self.assets_index_file: FileResource
-        self.behind_arguments: list[str]
+        self.behind_arguments: list[str] = []
         self.front_arguments: list[str]
         self.source: str
         self.has_mod_loader: bool
