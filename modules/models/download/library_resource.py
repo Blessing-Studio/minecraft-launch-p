@@ -1,3 +1,6 @@
+from os.path import join
+
+
 class LibraryResource():
     def __init__(self) -> None:
         self.root: str
@@ -9,9 +12,9 @@ class LibraryResource():
         self.is_natives: bool = False
 
     def to_file_info(self) -> str:
-        root: str = f"{self.root}\\libraries"
+        root: str = join(self.root, "libraries")
         for item in self.format_name(self.name):
-            root = f"{root}\\{item}"
+            root = join(root, item)
         return root
 
     @staticmethod

@@ -5,7 +5,7 @@ from modules.models.download.api_manager import APIManager
 from modules.models.download.file_resource import FileResource
 from modules.models.launch.game_core import GameCore
 from modules.parser.library_parser import LibraryParser
-from os.path import basename, abspath
+from os.path import basename, abspath, join
 from modules.models.launch.mod_loader_info import ModLoaderInfo
 
 
@@ -88,11 +88,11 @@ class GameCoreParser():
                 yield self.__combine(item2, game_core2)
 
     def __get_client_file(self, entity: dict) -> FileResource:
-        text: str = f"{self.root}\\versions\\{entity['id']}\\{entity['id']}.jar"
+        text: str = join(self.root, "versions", entity['id'], f"{entity['id']}.jar")
         return FileResource(
             check_sum = entity['downloads']["client"]['sha1'],
             size = entity['downloads']['client']['size'],
-            url = entity['downloads']["client"]['url'].replace("https://launcher.mojang.com", APIManager.current.host) if APIManager.current != APIManager.mojang else entity.downloads["client"].url,
+            url = entity['downloads']["client"]['url'].replace("https://launcher.mojang.com", APIManager.current.host) if APIManager.current != APIManager.mojang else entity["downloads"]["client"]["url"],
             root = self.root,
             file_info = text,
             name = basename(text)
@@ -100,7 +100,7 @@ class GameCoreParser():
 
     def __get_log_config_file(self, entity: dict) -> FileResource:
         mid = entity['logging']['client']['file']['url']
-        file_name: str = f"{self.root}\\versions\\{entity['id']}\\{entity['logging']['client']['file']['id'] if entity['logging']['client']['file']['id'] != None else basename(mid)}"
+        file_name: str = join(self.root, "versions", entity['id'], entity['logging']['client']['file']['id'] if entity['logging']['client']['file']['id'] != None else basename(mid))
         return FileResource(
             check_sum = entity['logging']['client']['file']['sha1'],
 			size = entity['logging']['client']['file']['size'],
@@ -111,7 +111,7 @@ class GameCoreParser():
         )
     
     def __get_assets_index_file(self, entity: dict) -> FileResource:
-        file_name: str = f"{self.root}\\assets\\indexes\\{entity['assetIndex']['id']}.json"
+        file_name: str = join(self.root, "assets", "indexes", f"{entity['assetIndex']['id']}.json")
         return FileResource(
             check_sum = entity['assetIndex']['sha1'],
 			size = entity['assetIndex']['size'],
@@ -123,7 +123,7 @@ class GameCoreParser():
     
     def __get_source(self, core: GameCore) ->str:
         try:
-            path: str = f'{core.root}\\versions\\{core.id}\\{core.id}.json'
+            path: str = join(core.root, "versions", core.id, f"{core.id}.json")
             if(core.inherits_from != None):
                 return core.inherits_from
             if(exists(path)):

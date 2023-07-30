@@ -1,4 +1,5 @@
 from os import remove, system, makedirs
+from os.path import join
 import platform
 from modules.arguments_builders.java_minecraft_arguments_builder import JavaMinecraftArgumentsBuilder
 from modules.interface.launch_base import LaunchBase
@@ -14,7 +15,10 @@ class JavaMinecraftLauncher(LaunchBase[JavaMinecraftArgumentsBuilder, MinecraftL
         self.game_core_toolkit = game_core_toolkit
 
     def launch_task_async(self, id: str):
-        makedirs("MLP\\shell")
+        try:
+            makedirs(join("MLP", "shell"))
+        except:
+            ...
 
         core: GameCore = self.game_core_toolkit.get_game_core(id)
 
@@ -24,7 +28,7 @@ class JavaMinecraftLauncher(LaunchBase[JavaMinecraftArgumentsBuilder, MinecraftL
             self.launch_setting
             )
 
-        __shell = f"MLP\\shell\\launch{__system_dict[platform.system()]}"
+        __shell = join("MLP", "shell", f"launch{__system_dict[platform.system()]}")
         args = arguments_builder.build()
         bat = open(__shell, "w")
         bat.write(str.join(" ", args))
