@@ -4,7 +4,7 @@ from modules.models.launch.mod_loader_info import ModLoaderInfo
 
 
 class GameCore():
-    def __init__(self):
+    def __init__(self) -> None:
         self.id: str
         self.root: str
         self.type: str
@@ -20,4 +20,3 @@ class GameCore():
         self.source: str
         self.has_mod_loader: bool
         self.mod_loader_infos: list[ModLoaderInfo] = []
-

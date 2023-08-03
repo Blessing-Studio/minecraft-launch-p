@@ -11,42 +11,45 @@ class LibraryParser():
 
     def get_libraries(self) -> list[LibraryResource]:
         for library_json_entity in self.entities:
-            if ('artifact' in library_json_entity['downloads']):
-                obj: LibraryResource = LibraryResource()
-                a = library_json_entity['downloads']['artifact']
-                obj.check_sum = a['sha1'] if a['sha1'] != None else ""
-                downloads: dict = library_json_entity['downloads']
-                num: int
-                if (downloads == None):
-                    num = 1
+            obj: LibraryResource = LibraryResource()
+            if("downloads" in library_json_entity):
+                num = 0
+                if ('artifact' in library_json_entity['downloads']):
+                    a = library_json_entity['downloads']['artifact']
+                    num = 0
                 else:
-                    artifact: dict = downloads['artifact']
-                    if (artifact == None):
-                        num = 1
-                    else:
-                        _ = artifact['size']
-                        num = 0                
-                obj.size = a['size'] if num == 1 else 0
-                obj.url = (a['url'] if 'url' in a else "") + (library_json_entity['url'] if 'url' in library_json_entity else "")
-                obj.name = library_json_entity['name']
-                obj.root = self.root
-                obj.is_enable = True
-                library_resource: LibraryResource = obj
-                if('rules' in library_json_entity):
-                    library_resource.is_enable = self.__get_ability(library_json_entity, EnvironmentUtil.get_platform_name())
-                if('natives' in library_json_entity):
-                    library_resource.is_natives = True
-                    if(not EnvironmentUtil.get_platform_name() in library_json_entity['natives']):
-                        library_resource.is_enable = False
-                    if(library_resource.is_enable):
-                        library_resource.name = f"{library_resource.name}:{self.__get_native_name(library_json_entity)}"
-                        file: dict = library_json_entity['downloads']['classifiers'][library_json_entity['natives'][EnvironmentUtil.get_platform_name()].replace("${arch}", EnvironmentUtil.arch)]
-                        library_resource.check_sum = file['sha1']
-                        library_resource.size = file['size']
-                        library_resource.url = file['url']
-                yield library_resource
+                    a = None
+                    num = 1
             else:
-                return []
+                a = None
+            if a != None:
+                obj.url = (a['url'] if 'url' in a else "") + (library_json_entity['url'] if 'url' in library_json_entity else "")
+                obj.size = a['size'] if 'size' in a and num == 0 else 0                
+                obj.check_sum = a['sha1'] if 'sha1' in a else ""
+            else:
+                obj.check_sum = ""
+                num = 0
+
+            obj.name = library_json_entity['name']
+            obj.root = self.root
+            obj.is_enable = True
+            library_resource: LibraryResource = obj
+            if('rules' in library_json_entity):
+                library_resource.is_enable = self.__get_ability(library_json_entity, EnvironmentUtil.get_platform_name())
+            if('natives' in library_json_entity):
+                library_resource.is_natives = True
+                if(not EnvironmentUtil.get_platform_name() in library_json_entity['natives']):
+                    library_resource.is_enable = False
+                if(library_resource.is_enable):
+                    library_resource.name = f"{library_resource.name}:{self.__get_native_name(library_json_entity)}"
+                    file: dict = library_json_entity['downloads']['classifiers'][library_json_entity['natives'][EnvironmentUtil.get_platform_name()].replace("${arch}", EnvironmentUtil.arch)]
+                    library_resource.check_sum = file['sha1']
+                    library_resource.size = file['size']
+                    library_resource.url = file['url']
+            else:
+                library_resource.is_natives = False
+                
+            yield library_resource
 
     def __get_native_name(self, library_json_entity: dict) -> str:
         return library_json_entity['natives'][EnvironmentUtil.get_platform_name()].replace("${arch}", EnvironmentUtil.arch)

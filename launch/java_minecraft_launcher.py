@@ -1,5 +1,5 @@
 from os import remove, system, makedirs
-from os.path import join
+from os.path import join, exists
 import platform
 from modules.arguments_builders.java_minecraft_arguments_builder import JavaMinecraftArgumentsBuilder
 from modules.interface.launch_base import LaunchBase
@@ -7,6 +7,7 @@ from modules.models.launch.game_core import GameCore
 from modules.models.launch.launch_config import LaunchConfig
 from modules.models.launch.minecraft_launch_response import MinecraftLaunchResponse
 from modules.utils.game_core_util import GameCoreUtil
+from modules.utils.zip_util import ZipUtil
 
 
 class JavaMinecraftLauncher(LaunchBase[JavaMinecraftArgumentsBuilder, MinecraftLaunchResponse]):
@@ -28,8 +29,17 @@ class JavaMinecraftLauncher(LaunchBase[JavaMinecraftArgumentsBuilder, MinecraftL
             self.launch_setting
             )
 
-        __shell = join("MLP", "shell", f"launch{__system_dict[platform.system()]}")
+        __shell = join("MLP", "shell", f"launch_process{__system_dict[platform.system()]}")
         args = arguments_builder.build()
+
+        if (self.launch_setting.natives_folder != None):
+            if(exists(self.launch_setting.natives_folder)):
+                natives: str = self.launch_setting.natives_folder 
+        else:
+            natives = join(core.root, "versions", core.id, "natives")
+
+        ZipUtil.game_natives_decompress(natives, core.library_resources)
+
         bat = open(__shell, "w")
         bat.write(str.join(" ", args))
         bat.close()

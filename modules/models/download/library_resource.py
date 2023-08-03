@@ -9,7 +9,7 @@ class LibraryResource():
         self.url: str
         self.name: str
         self.is_enable: bool
-        self.is_natives: bool = False
+        self.is_natives: bool
 
     def to_file_info(self) -> str:
         root: str = join(self.root, "libraries")

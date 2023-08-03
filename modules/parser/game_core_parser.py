@@ -24,14 +24,8 @@ class GameCoreParser():
                 game_core.type = json_entity['type']
                 game_core.root = self.root
                 game_core.main_class = json_entity['mainClass']
-                try:
-                    game_core.inherits_from = json_entity['inheritsFrom']
-                except:
-                    ...
-                try:
-                    game_core.java_version = json_entity['javaVersion']['majorVersion']
-                except:
-                    ...
+                game_core.inherits_from = json_entity['inheritsFrom'] if "inheritsFrom" in json_entity else None
+                game_core.java_version = json_entity['javaVersion']['majorVersion'] if 'javaVersion' in json_entity else None 
                 game_core.library_resources = list(LibraryParser(json_entity['libraries'], self.root).get_libraries())
 
                 if(not 'inheritsFrom' in json_entity)&('downloads' in json_entity):
@@ -45,21 +39,21 @@ class GameCoreParser():
                     game_core.assets_index_file = self.__get_assets_index_file(json_entity)
 
                 if('minecraftArguments' in json_entity):
-                    game_core.behind_arguments = json_entity['minecraftArguments'].split(" ")
+                    game_core.behind_arguments = self.__handle_minecraft_arguments(json_entity['minecraftArguments'])
 
                 if('arguments' in json_entity):
-                    if('games' in json_entity['arguments']):
-                        behind_arguments: list[str]
+                    if('game' in json_entity['arguments']):
                         if(game_core.behind_arguments != None):
-                            behind_arguments = list(set(game_core.behind_arguments).union(set(self.__handle_arguments_game(json_entity['arguments']))))
+                            behind_arguments: list[str] = game_core.behind_arguments
+                            behind_arguments += self.__handle_arguments_game(json_entity['arguments']) 
                         else:
-                            enumerable: list[str] = self.__handle_arguments_game(json_entity['arguments'])
-                            behind_arguments = enumerable
+                            behind_arguments: list[str] = self.__handle_arguments_game(json_entity['arguments'])
+
                         game_core.behind_arguments = behind_arguments
 
                 if('arguments' in json_entity):
                     if('jvm' in json_entity['arguments']):
-                        game_core.front_arguments = self.__handle_arguments_jvm(json_entity['arguments'])
+                        game_core.front_arguments = self.__handle_arguments_jvm(json_entity["arguments"])
                     else:
                         game_core.front_arguments = ["-Djava.library.path=${natives_directory}", "-Dminecraft.launcher.brand=${launcher_name}", "-Dminecraft.launcher.version=${launcher_version}", "-cp ${classpath}"]
                 else:
@@ -190,31 +184,29 @@ class GameCoreParser():
 
     
     def __handle_minecraft_arguments(self, minecraft_arguments: str) -> list[str]:
-        return GameCoreParser.__arguments_group(minecraft_arguments.replace("  ", " ").split(" "))
+        return minecraft_arguments.replace("  ", " ").split(' ')
     
     def __handle_arguments_game(self, entity: dict) -> list[str]:
-        return GameCoreParser.__arguments_group(vs = [ i for i in entity['game'] if type(i) == str] )
+        return [i for i in entity['game'] if type(i) == str]
     
     def __handle_arguments_jvm(self, entity: dict) -> list[str]:
-        return GameCoreParser.__arguments_group(vs = [ i for i in entity['jvm'] if type(i) == str] )
+        return [i for i in entity['jvm'] if type(i) == str]
     
     @staticmethod
     def __arguments_group(vs: list[str]) -> list[str]:
         cache: list[str] = []
-        res: list = []
         for item in vs:
             if(any(cache)):
                 if (cache[0].startswith("-") & item.startswith("-")):
-                    res.append(cache[0].strip(' '))
+                    yield cache[0].strip(' ')
                     cache = [item]
             elif(vs[-1] == item)&(not any(cache)):
-                res.append(item.strip(' '))
+                yield item.strip(' ')
             else:
                 cache.append(item)
             if(len(cache) == 2):
-                res.append(str.join(" ", cache).strip(' '))
+                yield str.join(" ", cache).strip(' ')
                 cache = []
-            return res
 
     def __combine(self, raw: GameCore, inherits_from: GameCore) -> GameCore:
         raw.assets_index_file = inherits_from.assets_index_file
