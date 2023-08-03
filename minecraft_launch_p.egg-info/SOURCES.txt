@@ -1,0 +1,12 @@
+LICENSE
+README.md
+setup.py
+events/__init__.py
+launch/__init__.py
+launch/java_minecraft_launcher.py
+minecraft_launch_p.egg-info/PKG-INFO
+minecraft_launch_p.egg-info/SOURCES.txt
+minecraft_launch_p.egg-info/dependency_links.txt
+minecraft_launch_p.egg-info/top_level.txt
+oauth/__init__.py
+oauth/microsoft_auth.py
