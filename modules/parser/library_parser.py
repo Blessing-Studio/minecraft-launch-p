@@ -60,10 +60,10 @@ class LibraryParser():
         windows = linux = osx = False
         for item in library_json_entity['rules']:
             if(item['action'] == "allow"):
-                if(not 'system' in item):
+                if(not 'os' in item):
                     windows = linux = osx = True
                     continue
-                for enumerate2 in item['system'].values():
+                for enumerate2 in item['os'].values():
                     match enumerate2:
                         case "windows":
                             windows = True
@@ -74,11 +74,11 @@ class LibraryParser():
             else:
                 if(not item['action'] == "disallow"):
                     continue
-                if(not 'system' in item):
+                if(not 'os' in item):
                     windows = linux = osx =False
                 
-                if ('system' in item):
-                    for enumerate2 in item['system'].values():
+                if ('os' in item):
+                    for enumerate2 in item['os'].values():
                         match enumerate2:
                             case "windows":
                                 windows = True

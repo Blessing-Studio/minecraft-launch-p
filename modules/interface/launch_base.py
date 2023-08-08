@@ -9,5 +9,5 @@ class LaunchBase(Generic[T, T2]):
         self.launch_setting: LaunchConfig
         self.arguments_builder: T
 
-    def launch_task_async(self, id: str) -> T2:
+    def launch(self, id: str) -> T2:
         raise Exception()

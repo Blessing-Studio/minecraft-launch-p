@@ -14,8 +14,6 @@ class ZipUtil():
         for item in [x for x in library_resources if x.is_enable & x.is_natives]:
             zip_file: ZipFile = ZipFile(item.to_file_info())
             for z in zip_file.namelist():
-            #try:
                 if(".dll" in basename(z))|(".so" in basename(z))|(".dylib" in basename(z)):
                     zip_file.extract(z, directory)
-            #except: ...
             zip_file.close()

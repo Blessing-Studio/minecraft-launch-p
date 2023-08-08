@@ -1,3 +1,4 @@
+from json import dump, load
 from os import listdir, remove
 from os.path import isfile, isdir, join
 from shutil import rmtree
@@ -24,4 +25,14 @@ class ExtendUtil():
                 remove(join(path, i))
             elif(isdir(join(path, i))):
                 rmtree(join(path, i))
+    @staticmethod
+    def beautifyjson(path: str) -> None:
+        with open(path, encoding="utf-8") as f:
+            json_to_dict = load(f)
+        with open(path, "w", encoding='utf-8') as f:
+            dump(json_to_dict,
+                f,
+                indent=2,
+                sort_keys=True,
+                ensure_ascii=False)
 
