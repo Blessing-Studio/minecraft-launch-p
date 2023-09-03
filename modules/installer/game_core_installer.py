@@ -3,7 +3,32 @@ from urllib.request import urlretrieve
 from sys import stdout
 from os.path import split, exists
 from threading import Thread
+from modules.interface.installer_base import InstallerBase
+from modules.models.install.game_core_entity import GameCoreEntity
+from modules.models.install.game_cores_entity import GameCoresEntity
+from modules.models.install.installer_response import InstallerResponse
+from modules.utils.game_core_util import GameCoreUtil
+from modules.utils.http_util import HttpUtil
+from modules.models.download.api_manager import APIManager
 
+
+class GameCoreInstaller(InstallerBase[InstallerResponse]):
+    def __init__(self, game_core_toolkit: GameCoreUtil, id: str, custom_id: str = None) -> None:
+        self.game_core_toolkit = game_core_toolkit
+        self.id = id
+        self.custom_id = custom_id
+        for x in GameCoreInstaller.get_game_cores().cores:
+            if(x.id == id):
+                self.core_info: GameCoreEntity = x
+
+
+    @staticmethod
+    def get_game_cores() -> GameCoresEntity:
+        return GameCoresEntity(HttpUtil.get_str(APIManager.current.version_manifest))
+         
+    async def install(self) -> InstallerResponse:
+        ...
+        
 
 def makedir(path):
     import os
@@ -91,12 +116,3 @@ def Install(version: str, mcdir: str, source: str):
         
         for th in Thread:
             th.join()
-
-
-class GameCoreInstaller():
-    async def InstallAsync():
-        pass
-
-
-if __name__ == "__main__":
-    Install("1.7.10", ".minecraft", "BMCLAPI")

@@ -3,7 +3,7 @@ from os.path import join, exists
 import platform
 from modules.arguments_builders.java_minecraft_arguments_builder import JavaMinecraftArgumentsBuilder
 from modules.enum.launch_state import LaunchState
-from modules.interface.launch_base import LaunchBase
+from modules.interface.launcher_base import LauncherBase
 from modules.models.launch.game_core import GameCore
 from modules.models.launch.launch_config import LaunchConfig
 from modules.models.launch.minecraft_launch_response import MinecraftLaunchResponse
@@ -11,7 +11,7 @@ from modules.utils.game_core_util import GameCoreUtil
 from modules.utils.zip_util import ZipUtil
 
 
-class JavaMinecraftLauncher(LaunchBase[JavaMinecraftArgumentsBuilder, MinecraftLaunchResponse]):
+class JavaMinecraftLauncher(LauncherBase[JavaMinecraftArgumentsBuilder, MinecraftLaunchResponse]):
     @property
     def __system_dict(self) -> dict[str, str]:
         return {"Windows": ".bat", "Darwin": ".sh", "Linux": ".sh"}
@@ -47,8 +47,8 @@ class JavaMinecraftLauncher(LaunchBase[JavaMinecraftArgumentsBuilder, MinecraftL
         function((0.6, "正在检查游戏依赖文件")) if function != None else ...
         
         function((0.8, "正在构建启动参数")) if function != None else ...
-        arguments_builder = JavaMinecraftArgumentsBuilder(core, self.launch_setting)
-        args = arguments_builder.build()
+        self.arguments_builder = JavaMinecraftArgumentsBuilder(core, self.launch_setting)
+        args = self.arguments_builder.build()
 
         function((0.9, "正在检查Natives")) if  function != None else ...
         if (self.launch_setting.natives_folder != None):
@@ -61,9 +61,10 @@ class JavaMinecraftLauncher(LaunchBase[JavaMinecraftArgumentsBuilder, MinecraftL
 
         # 启动
         function((1, "正在尝试启动游戏")) if function != None else ...
-        __shell = join("MLP", "shell", f"launch_process{self.__system_dict[platform.system()]}")
-        bat = open(__shell, "w")
+        shell = join("MLP", "shell", f"launch_process{self.__system_dict[platform.system()]}")
+        bat = open(shell, "w")
         bat.write(str.join(" ", args))
         bat.close()
-        system(__shell)
-        remove(__shell)
+        system(shell)
+        remove(shell)
+        return MinecraftLaunchResponse(LaunchState.Success, args)
