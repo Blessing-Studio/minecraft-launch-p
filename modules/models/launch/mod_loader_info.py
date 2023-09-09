@@ -1,4 +1,4 @@
-from modules.enum.mod_loader_type import ModLoaderType
+from minecraft_launch.modules.enum.mod_loader_type import ModLoaderType
 
 
 class ModLoaderInfo():

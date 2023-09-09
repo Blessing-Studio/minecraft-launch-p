@@ -1,7 +1,7 @@
-from modules.models.auth.account import Account
-from modules.models.launch.game_window_config import GameWindowConfig
-from modules.models.launch.jvm_config import JvmConfig
-from modules.models.launch.sever_config import SeverConfig
+from minecraft_launch.modules.models.auth.account import Account
+from minecraft_launch.modules.models.launch.game_window_config import GameWindowConfig
+from minecraft_launch.modules.models.launch.jvm_config import JvmConfig
+from minecraft_launch.modules.models.launch.sever_config import SeverConfig
 
 
 class LaunchConfig():

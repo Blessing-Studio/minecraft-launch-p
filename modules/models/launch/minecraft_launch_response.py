@@ -1,4 +1,4 @@
-from modules.enum.launch_state import LaunchState
+from minecraft_launch.modules.enum.launch_state import LaunchState
 
 
 class MinecraftLaunchResponse():

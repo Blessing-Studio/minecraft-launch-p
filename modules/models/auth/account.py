@@ -1,5 +1,5 @@
-from modules.enum.account_type import AccountType
-from modules.models.auth.offline_account import OfflineAccount
+from minecraft_launch.modules.enum.account_type import AccountType
+from minecraft_launch.modules.models.auth.offline_account import OfflineAccount
 from uuid import uuid4
 
 

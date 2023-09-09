@@ -1,4 +1,4 @@
-from modules.enum.account_type import AccountType
+from minecraft_launch.modules.enum.account_type import AccountType
 from uuid import uuid4
 
 

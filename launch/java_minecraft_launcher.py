@@ -1,14 +1,14 @@
 from os import remove, system, makedirs
 from os.path import join, exists
 import platform
-from modules.arguments_builders.java_minecraft_arguments_builder import JavaMinecraftArgumentsBuilder
-from modules.enum.launch_state import LaunchState
-from modules.interface.launcher_base import LauncherBase
-from modules.models.launch.game_core import GameCore
-from modules.models.launch.launch_config import LaunchConfig
-from modules.models.launch.minecraft_launch_response import MinecraftLaunchResponse
-from modules.utils.game_core_util import GameCoreUtil
-from modules.utils.zip_util import ZipUtil
+from minecraft_launch.modules.arguments_builders.java_minecraft_arguments_builder import JavaMinecraftArgumentsBuilder
+from minecraft_launch.modules.enum.launch_state import LaunchState
+from minecraft_launch.modules.interface.launcher_base import LauncherBase
+from minecraft_launch.modules.models.launch.game_core import GameCore
+from minecraft_launch.modules.models.launch.launch_config import LaunchConfig
+from minecraft_launch.modules.models.launch.minecraft_launch_response import MinecraftLaunchResponse
+from minecraft_launch.modules.utils.game_core_util import GameCoreUtil
+from minecraft_launch.modules.utils.zip_util import ZipUtil
 
 
 class JavaMinecraftLauncher(LauncherBase[JavaMinecraftArgumentsBuilder, MinecraftLaunchResponse]):

@@ -1,12 +1,12 @@
 from genericpath import exists
 from json import loads
-from modules.enum.mod_loader_type import ModLoaderType
-from modules.models.download.api_manager import APIManager
-from modules.models.download.file_resource import FileResource
-from modules.models.launch.game_core import GameCore
-from modules.parser.library_parser import LibraryParser
+from minecraft_launch.modules.enum.mod_loader_type import ModLoaderType
+from minecraft_launch.modules.models.download.api_manager import APIManager
+from minecraft_launch.modules.models.download.file_resource import FileResource
+from minecraft_launch.modules.models.launch.game_core import GameCore
+from minecraft_launch.modules.parser.library_parser import LibraryParser
 from os.path import basename, abspath, join
-from modules.models.launch.mod_loader_info import ModLoaderInfo
+from minecraft_launch.modules.models.launch.mod_loader_info import ModLoaderInfo
 
 
 class GameCoreParser(): 

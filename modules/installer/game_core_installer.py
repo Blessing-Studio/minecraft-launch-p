@@ -3,13 +3,13 @@ from urllib.request import urlretrieve
 from sys import stdout
 from os.path import split, exists
 from threading import Thread
-from modules.interface.installer_base import InstallerBase
-from modules.models.install.game_core_entity import GameCoreEntity
-from modules.models.install.game_cores_entity import GameCoresEntity
-from modules.models.install.installer_response import InstallerResponse
-from modules.utils.game_core_util import GameCoreUtil
-from modules.utils.http_util import HttpUtil
-from modules.models.download.api_manager import APIManager
+from minecraft_launch.modules.interface.installer_base import InstallerBase
+from minecraft_launch.modules.models.install.game_core_entity import GameCoreEntity
+from minecraft_launch.modules.models.install.game_cores_entity import GameCoresEntity
+from minecraft_launch.modules.models.install.installer_response import InstallerResponse
+from minecraft_launch.modules.utils.game_core_util import GameCoreUtil
+from minecraft_launch.modules.utils.http_util import HttpUtil
+from minecraft_launch.modules.models.download.api_manager import APIManager
 
 
 class GameCoreInstaller(InstallerBase[InstallerResponse]):

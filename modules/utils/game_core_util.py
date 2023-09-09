@@ -3,9 +3,9 @@ from shutil import move, rmtree
 from os.path import exists, abspath, join, isfile, isdir
 from os import makedirs, listdir
 import traceback
-from modules.models.launch.game_core import GameCore
-from modules.parser.game_core_parser import GameCoreParser
-from modules.utils.extend_util import ExtendUtil
+from minecraft_launch.modules.models.launch.game_core import GameCore
+from minecraft_launch.modules.parser.game_core_parser import GameCoreParser
+from minecraft_launch.modules.utils.extend_util import ExtendUtil
 
 
 class GameCoreUtil():

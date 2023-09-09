@@ -1,4 +1,4 @@
-from modules.models.install.game_core_entity import GameCoreEntity
+from minecraft_launch.modules.models.install.game_core_entity import GameCoreEntity
 
 
 class GameCoresEntity():

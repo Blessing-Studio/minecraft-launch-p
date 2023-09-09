@@ -1,5 +1,5 @@
 from typing import TypeVar, Generic
-from modules.models.launch.launch_config import LaunchConfig
+from minecraft_launch.modules.models.launch.launch_config import LaunchConfig
 from abc import ABCMeta
 
 

@@ -1,5 +1,5 @@
-from modules.models.download.library_resource import LibraryResource
-from modules.utils.environment_util import EnvironmentUtil
+from minecraft_launch.modules.models.download.library_resource import LibraryResource
+from minecraft_launch.modules.utils.environment_util import EnvironmentUtil
 from os.path import abspath
 
 

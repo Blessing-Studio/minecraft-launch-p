@@ -1,6 +1,6 @@
-from modules.models.download.file_resource import FileResource
-from modules.models.download.library_resource import LibraryResource
-from modules.models.launch.mod_loader_info import ModLoaderInfo
+from minecraft_launch.modules.models.download.file_resource import FileResource
+from minecraft_launch.modules.models.download.library_resource import LibraryResource
+from minecraft_launch.modules.models.launch.mod_loader_info import ModLoaderInfo
 
 
 class GameCore():

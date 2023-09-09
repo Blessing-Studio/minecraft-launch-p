@@ -1,4 +1,4 @@
-from modules.models.download.download_api import DownloadAPI
+from minecraft_launch.modules.models.download.download_api import DownloadAPI
 
 
 class APIManager():

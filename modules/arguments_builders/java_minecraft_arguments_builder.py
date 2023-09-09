@@ -1,10 +1,10 @@
 from os.path import exists, basename, join
 import platform
-from modules.models.launch.game_core import GameCore
-from modules.models.launch.launch_config import LaunchConfig
+from minecraft_launch.modules.models.launch.game_core import GameCore
+from minecraft_launch.modules.models.launch.launch_config import LaunchConfig
 import os
-from modules.utils.environment_util import EnvironmentUtil
-from modules.utils.extend_util import ExtendUtil
+from minecraft_launch.modules.utils.environment_util import EnvironmentUtil
+from minecraft_launch.modules.utils.extend_util import ExtendUtil
 
 
 class JavaMinecraftArgumentsBuilder():
@@ -62,7 +62,7 @@ class JavaMinecraftArgumentsBuilder():
         key_value_pairs: dict[str, str] = {
             "${launcher_name}": "minecraft-launch-p",
             "${launcher_version}": "3",
-            "${classpath_separator}": os.sep,
+            "${classpath_separator}": ";",
             "${classpath}": self.__get_classpath(),
             "${client}": self.game_core.client_file.file_info,
             "${min_memory}": str(self.launch_config.jvm_config.min_memory),

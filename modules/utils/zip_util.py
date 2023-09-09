@@ -1,8 +1,8 @@
 from os import makedirs
 from os.path import exists,basename
 from zipfile import ZipFile
-from modules.utils.extend_util import ExtendUtil
-from modules.models.download.library_resource import LibraryResource
+from minecraft_launch.modules.utils.extend_util import ExtendUtil
+from minecraft_launch.modules.models.download.library_resource import LibraryResource
 
 
 class ZipUtil():
