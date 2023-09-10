@@ -1,21 +1,22 @@
 from genericpath import exists
 from json import loads
+from typing import Iterable
+from os.path import basename, abspath, join
 from minecraft_launch.modules.enum.mod_loader_type import ModLoaderType
 from minecraft_launch.modules.models.download.api_manager import APIManager
 from minecraft_launch.modules.models.download.file_resource import FileResource
 from minecraft_launch.modules.models.launch.game_core import GameCore
 from minecraft_launch.modules.parser.library_parser import LibraryParser
-from os.path import basename, abspath, join
 from minecraft_launch.modules.models.launch.mod_loader_info import ModLoaderInfo
 
 
 class GameCoreParser(): 
     def __init__(self, root: str, json_entities: list[dict]) -> None:
-        self.root = abspath(root)
-        self.json_entities = json_entities
+        self.root: str = abspath(root)
+        self.json_entities: list[dict] = json_entities
         self.error_game_cores: list[(str, Exception)] = []
 
-    def get_game_cores(self) -> list[GameCore]:
+    def get_game_cores(self) -> Iterable[GameCore]:
         cores: list[GameCore] = []
         for json_entity in self.json_entities:
             # try:
@@ -29,7 +30,7 @@ class GameCoreParser():
                 game_core.library_resources = list(LibraryParser(json_entity['libraries'], self.root).get_libraries())
 
                 if(not 'inheritsFrom' in json_entity)&('downloads' in json_entity):
-                    game_core.client_file =  self.__get_client_file(json_entity)
+                    game_core.client_file = self.__get_client_file(json_entity)
 
                 if(not 'inheritsFrom' in json_entity)&('logging' in json_entity):
                     if('client' in json_entity['logging']):
@@ -135,11 +136,9 @@ class GameCoreParser():
     def __get_has_mod_loader(self, core: GameCore) -> bool:
         for enumerator in core.behind_arguments:
             match enumerator:
-                case "--tweakClass optifine.OptiFineTweaker":
-                    return True
-                case "--tweakClass net.minecraftforge.fml.common.launcher.FMLTweaker":
-                    return True
-                case "--fml.forgeGroup net.minecraftforge":
+                case "--tweakClass optifine.OptiFineTweaker"|\
+                "--tweakClass net.minecraftforge.fml.common.launcher.FMLTweaker"|\
+                "--fml.forgeGroup net.minecraftforge":
                     return True
         
         for front_arguments in core.front_arguments:
@@ -147,11 +146,9 @@ class GameCoreParser():
                 return True
             
         match core.main_class:
-            case "net.minecraft.client.main.Main":
-                return False
-            case "net.minecraft.launchwrapper.Launch":
-                return False
-            case "com.mojang.rubydung.RubyDung":		
+            case "net.minecraft.client.main.Main"|\
+                "net.minecraft.launchwrapper.Launch"|\
+                "com.mojang.rubydung.RubyDung":
                 return False
             case _:
                 return True

@@ -1,5 +1,6 @@
 from minecraft_launch.modules.models.download.library_resource import LibraryResource
 from minecraft_launch.modules.utils.environment_util import EnvironmentUtil
+from typing import Iterable
 from os.path import abspath
 
 
@@ -9,7 +10,7 @@ class LibraryParser():
         self.root = abspath(root)
         
 
-    def get_libraries(self) -> list[LibraryResource]:
+    def get_libraries(self) -> Iterable[LibraryResource]:
         for library_json_entity in self.entities:
             obj: LibraryResource = LibraryResource()
             if("downloads" in library_json_entity):

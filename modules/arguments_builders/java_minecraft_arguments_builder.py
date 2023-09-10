@@ -1,4 +1,5 @@
 from os.path import exists, basename, join
+from typing import Iterable
 import platform
 from minecraft_launch.modules.models.launch.game_core import GameCore
 from minecraft_launch.modules.models.launch.launch_config import LaunchConfig
@@ -15,7 +16,7 @@ class JavaMinecraftArgumentsBuilder():
         self.game_core = game_core
         self.launch_config = launch_config
             
-    def build(self) -> list[str]:
+    def build(self) -> Iterable[str]:
         yield f'"{self.launch_config.jvm_config.java_path}"'
 
         for front_arguments in self.get_front_arguments():
@@ -26,7 +27,7 @@ class JavaMinecraftArgumentsBuilder():
         for behind_arguments in self.get_behind_arguments():
             yield behind_arguments
 
-    def get_behind_arguments(self) -> list[str]:
+    def get_behind_arguments(self) -> Iterable[str]:
         key_value_pairs: dict[str, str] = {
             "${auth_player_name}": self.launch_config.account.name,
             "${version_name}": self.game_core.id,
@@ -58,7 +59,7 @@ class JavaMinecraftArgumentsBuilder():
         for item in List:
             yield ExtendUtil.replace(item, key_value_pairs)
         
-    def get_front_arguments(self) -> list[str]:
+    def get_front_arguments(self) -> Iterable[str]:
         key_value_pairs: dict[str, str] = {
             "${launcher_name}": "minecraft-launch-p",
             "${launcher_version}": "3",
@@ -68,7 +69,7 @@ class JavaMinecraftArgumentsBuilder():
             "${min_memory}": str(self.launch_config.jvm_config.min_memory),
             "${max_memory}": str(self.launch_config.jvm_config.max_memory),
             "${library_directory}": join(self.game_core.root, "libraries"),
-            "${version_name}": self.game_core.id if self.game_core.inherits_from == None or self.game_core.inherits_from == "" else self.game_core.inherits_from,           
+            "${version_name}": self.game_core.id if self.game_core.inherits_from in [None, ""] else self.game_core.inherits_from,           
             "${natives_directory}": self.launch_config.natives_folder if self.launch_config.natives_folder != None and exists(self.launch_config.natives_folder) else join(self.game_core.root, "versions", self.game_core.id, "natives"),
             }
         
@@ -112,7 +113,7 @@ class JavaMinecraftArgumentsBuilder():
         return str.join(";", __loads)
     
     @staticmethod
-    def __get_environment_jvm_arguments() -> list[str]:
+    def __get_environment_jvm_arguments() -> Iterable[str]:
         platform_name: str = EnvironmentUtil.get_platform_name()
         if(not platform_name == "windows"):
             if(platform_name == "osx"):

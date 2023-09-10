@@ -9,7 +9,7 @@ class GameCore():
         self.root: str
         self.type: str
         self.main_class: str
-        self.inherits_from: str = None
+        self.inherits_from: str|None = None
         self.java_version: int
         self.library_resources: list[LibraryResource]
         self.client_file: FileResource

@@ -2,6 +2,7 @@ from json import dumps, loads
 from shutil import move, rmtree
 from os.path import exists, abspath, join, isfile, isdir
 from os import makedirs, listdir
+from typing import Iterable
 import traceback
 from minecraft_launch.modules.models.launch.game_core import GameCore
 from minecraft_launch.modules.parser.game_core_parser import GameCoreParser
@@ -9,18 +10,18 @@ from minecraft_launch.modules.utils.extend_util import ExtendUtil
 
 
 class GameCoreUtil():
-    def __init__(self, path: str = ".minecraft"):
+    def __init__(self, path: str = ".minecraft") -> None:
         self.root = abspath(path)
         self.error_game_cores: list[(str, Exception)]
 
     def get_game_core(self, id: str) -> GameCore:
         core: GameCore = GameCore()
-        for core in self.get_geme_cores():
+        for core in self.get_game_cores():
             if core.id == id:
                 return core
         return None
     
-    def get_geme_cores(self) -> list[GameCore]:
+    def get_game_cores(self) -> Iterable[GameCore]:
         entities: list[dict] = []
         versions_folder: str = join(self.root, "versions")
         if (not exists(versions_folder)):

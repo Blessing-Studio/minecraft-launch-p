@@ -12,4 +12,4 @@ class OfflineAccount():
         self.access_token = access_token
         self.client_token = client_token
         self.name = name
-        self.type = AccountType.Offine
+        self.type = AccountType.Offline
