@@ -1,3 +1,5 @@
+from os.path import join
+from typing import Iterable
 from minecraft_launch.modules.models.download.file_resource import FileResource
 from minecraft_launch.modules.models.download.library_resource import LibraryResource
 from minecraft_launch.modules.models.launch.mod_loader_info import ModLoaderInfo
@@ -19,4 +21,8 @@ class GameCore():
         self.front_arguments: list[str]
         self.source: str
         self.has_mod_loader: bool
-        self.mod_loader_infos: list[ModLoaderInfo] = []
+        self.mod_loader_infos: Iterable[ModLoaderInfo] = []
+
+        self.get_versions_path = lambda : join(self.root, "versions")
+        self.get_game_core_path = lambda isolate = True : join(self.get_versions_path() if isolate else self.root, self.id if isolate else "")
+        self.get_options_file_path = lambda isolate = True: join(self.get_game_core_path(isolate), "options.txt") 

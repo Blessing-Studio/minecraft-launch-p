@@ -1,7 +1,9 @@
-from os import remove, system, makedirs
-from os.path import join, exists
-from typing import Callable, Any
+import aiofiles
 import platform
+from asyncio import get_event_loop
+from os import remove, system, makedirs
+from os.path import join, exists, isfile
+from typing import Callable, Any, Iterable
 from minecraft_launch.modules.arguments_builders.java_minecraft_arguments_builder import JavaMinecraftArgumentsBuilder
 from minecraft_launch.modules.enum.launch_state import LaunchState
 from minecraft_launch.modules.interface.launcher_base import LauncherBase
@@ -18,8 +20,9 @@ class JavaMinecraftLauncher(LauncherBase[JavaMinecraftArgumentsBuilder, Minecraf
         return {"Windows": ".bat", "Darwin": ".sh", "Linux": ".sh"}
 
     def __init__(self, launch_setting: LaunchConfig, game_core_toolkit: GameCoreUtil) -> None:
-        self.launch_setting = launch_setting
-        self.game_core_toolkit = game_core_toolkit
+        self.launch_setting: LaunchConfig = launch_setting
+        self.game_core_toolkit: GameCoreUtil = game_core_toolkit
+
         makedirs(join("MLP", "shell")) if not exists(join("MLP", "shell")) else ...
 
     def launch(self, id: str, action: Callable[[tuple[float, str]], Any]|None = None) -> MinecraftLaunchResponse:
@@ -46,10 +49,13 @@ class JavaMinecraftLauncher(LauncherBase[JavaMinecraftArgumentsBuilder, Minecraf
             return MinecraftLaunchResponse(LaunchState.Failed, None, Exception("启动失败,未设置账户"))
         
         action((0.6, "正在检查游戏依赖文件")) if action != None else ...
+
+        loop = get_event_loop()
+        loop.run_until_complete(self.__lang_switch_async(core))
         
         action((0.8, "正在构建启动参数")) if action != None else ...
         self.arguments_builder = JavaMinecraftArgumentsBuilder(core, self.launch_setting)
-        args = self.arguments_builder.build()
+        args: Iterable[str] = self.arguments_builder.build()
 
         action((0.9, "正在检查Natives")) if  action != None else ...
         if (self.launch_setting.natives_folder != None):
@@ -62,10 +68,24 @@ class JavaMinecraftLauncher(LauncherBase[JavaMinecraftArgumentsBuilder, Minecraf
 
         # 启动
         action((1.0, "正在尝试启动游戏")) if action != None else ...
-        shell = join("MLP", "shell", f"launch_process{self.__system_dict[platform.system()]}")
+        shell: str = join("MLP", "shell", f"launch_process{self.__system_dict[platform.system()]}")
         bat = open(shell, "w")
         bat.write(str.join(" ", args))
         bat.close()
         system(shell)
         remove(shell)
         return MinecraftLaunchResponse(LaunchState.Success, args)
+    
+    async def __lang_switch_async(self, core: GameCore):
+        if(self.launch_setting.is_chinese):
+            file_path = core.get_options_file_path()
+
+            if(not isfile(file_path)):
+                async with aiofiles.open(file_path, "w") as f:
+                    await f.write("lang:zh_cn")
+                    return
+            
+            async with aiofiles.open(file_path, "r+") as f:
+                content = await f.read()
+                await f.seek(0)
+                await f.write(content.replace("lang:en_us", "lang:zh_cn"))

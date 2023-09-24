@@ -24,7 +24,7 @@ class LibraryParser():
             else:
                 a = None
             if a != None:
-                obj.url = (a['url'] if 'url' in a else "") + (library_json_entity['url'] if 'url' in library_json_entity else "")
+                obj.url = f'''{(a['url'] if 'url' in a else "")}{(library_json_entity['url'] if 'url' in library_json_entity else "")}'''
                 obj.size = a['size'] if 'size' in a and num == 0 else 0                
                 obj.check_sum = a['sha1'] if 'sha1' in a else ""
             else:

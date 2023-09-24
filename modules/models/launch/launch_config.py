@@ -10,7 +10,8 @@ class LaunchConfig():
                 game_window_config: GameWindowConfig = GameWindowConfig(), 
                 sever_config: SeverConfig|None = None, is_enable_independency_core: bool = True, 
                 natives_folder: str|None = None, 
-                working_folder: str|None = None):
+                working_folder: str|None = None,
+                is_chinese: bool = False):
         
         self.account: Account = account
         self.jvm_config: JvmConfig = jvm_config
@@ -21,3 +22,4 @@ class LaunchConfig():
         self.launch_name: str = "minecraft-launch-p"
         self.is_server: bool = True
         self.is_enable_independency_core: bool = is_enable_independency_core
+        self.is_chinese: bool = is_chinese

@@ -153,14 +153,14 @@ class GameCoreParser():
             case _:
                 return True
                 
-    def __get_mod_loader_infos(self, core: GameCore) -> list[ModLoaderInfo]:
+    def __get_mod_loader_infos(self, core: GameCore) -> Iterable[ModLoaderInfo]:
         lib_find = [lib for lib in core.library_resources 
-                    if (str(lib.name.lower).startswith("optifine:optifine")) or\
-                    (str(lib.name.lower).startswith("net.minecraftforge:forge:")) or\
-                    (str(lib.name.lower).startswith("net.minecraftforge:fmlloader:")) or\
-                    (str(lib.name.lower).startswith("net.fabricmc:fabric-loader")) or\
-                    (str(lib.name.lower).startswith("com.mumfrey:liteloader:")) or\
-                    (str(lib.name.lower).startswith("org.quiltmc:quilt-loader"))
+                    if (lib.name.lower().startswith("optifine:optifine")) or\
+                    (lib.name.lower().startswith("net.minecraftforge:forge:")) or\
+                    (lib.name.lower().startswith("net.minecraftforge:fmlloader:")) or\
+                    (lib.name.lower().startswith("net.fabricmc:fabric-loader")) or\
+                    (lib.name.lower().startswith("com.mumfrey:liteloader:")) or\
+                    (lib.name.lower().startswith("org.quiltmc:quilt-loader"))
                     ]
         
         for lib in lib_find:
