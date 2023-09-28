@@ -25,4 +25,4 @@ class GameCore():
 
         self.get_versions_path = lambda : join(self.root, "versions")
         self.get_game_core_path = lambda isolate = True : join(self.get_versions_path() if isolate else self.root, self.id if isolate else "")
-        self.get_options_file_path = lambda isolate = True: join(self.get_game_core_path(isolate), "options.txt") 
+        self.get_options_file_path = lambda isolate = True : join(self.get_game_core_path(isolate), "options.txt") 

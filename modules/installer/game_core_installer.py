@@ -1,7 +1,9 @@
-from json import loads, dump, load
+import aiofiles
+from json import loads, dump, load, dumps
 from urllib.request import urlretrieve
 from sys import stdout
-from os.path import split, exists
+from os import makedirs
+from os.path import split, exists, join, dirname
 from threading import Thread
 from minecraft_launch.modules.interface.installer_base import InstallerBase
 from minecraft_launch.modules.models.install.game_core_entity import GameCoreEntity
@@ -13,10 +15,10 @@ from minecraft_launch.modules.models.download.api_manager import APIManager
 
 
 class GameCoreInstaller(InstallerBase[InstallerResponse]):
-    def __init__(self, game_core_toolkit: GameCoreUtil, id: str, custom_id: str = None) -> None:
-        self.game_core_toolkit = game_core_toolkit
-        self.id = id
-        self.custom_id = custom_id
+    def __init__(self, game_core_toolkit: GameCoreUtil, id: str, custom_id: str|None = None) -> None:
+        self.game_core_toolkit: GameCoreUtil = game_core_toolkit
+        self.id: str = id
+        self.custom_id: str|None = custom_id
         for x in GameCoreInstaller.get_game_cores().cores:
             if(x.id == id):
                 self.core_info: GameCoreEntity = x
@@ -27,7 +29,22 @@ class GameCoreInstaller(InstallerBase[InstallerResponse]):
         return GameCoresEntity(HttpUtil.get_str(APIManager.current.version_manifest))
          
     async def install(self) -> InstallerResponse:
-        ...
+        entity: dict = loads(HttpUtil.get_str(self.core_info.url))
+        if(not self.custom_id in (None, "")):
+            entity["id"] = self.custom_id
+        else:
+            entity["id"] = self.id
+
+        file_info: str = join(self.game_core_toolkit.root, "versions",
+                self.custom_id if self.custom_id != None else self.id,
+                (self.custom_id if self.custom_id != None else self.id) + ".json")
+        if(not exists(dirname(file_info))):
+            makedirs(dirname(file_info))
+        
+        async with aiofiles.open(file_info, "w") as f:
+            await f.write(dumps(entity))
+
+        
         
 
 def makedir(path):
@@ -114,5 +131,5 @@ def Install(version: str, mcdir: str, source: str):
                 while i >0:
                     i -= 1
         
-        for th in Thread:
+        for th in Threads:
             th.join()

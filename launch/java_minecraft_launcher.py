@@ -3,7 +3,7 @@ import platform
 from asyncio import get_event_loop
 from os import remove, system, makedirs
 from os.path import join, exists, isfile
-from typing import Callable, Any, Iterable
+from typing import Callable, Iterable, Any
 from minecraft_launch.modules.arguments_builders.java_minecraft_arguments_builder import JavaMinecraftArgumentsBuilder
 from minecraft_launch.modules.enum.launch_state import LaunchState
 from minecraft_launch.modules.interface.launcher_base import LauncherBase

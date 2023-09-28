@@ -1,11 +1,11 @@
-from os.path import exists, basename, join
-from typing import Iterable
+import os
 import platform
+from typing import Iterable
+from os.path import exists, basename, join
+from minecraft_launch.modules.utils.extend_util import ExtendUtil
 from minecraft_launch.modules.models.launch.game_core import GameCore
 from minecraft_launch.modules.models.launch.launch_config import LaunchConfig
-import os
 from minecraft_launch.modules.utils.environment_util import EnvironmentUtil
-from minecraft_launch.modules.utils.extend_util import ExtendUtil
 
 
 class JavaMinecraftArgumentsBuilder():
@@ -13,8 +13,8 @@ class JavaMinecraftArgumentsBuilder():
     default_advanced_arguments: list[str] = ["-XX:-OmitStackTraceInFastThrow", "-XX:-DontCompileHugeMethods", "-Dfile.encoding=GB18030", "-Dfml.ignoreInvalidMinecraftCertificates=true", "-Dfml.ignorePatchDiscrepancies=true", "-Djava.rmi.server.useCodebaseOnly=true", "-Dcom.sun.jndi.rmi.object.trustURLCodebase=false", "-Dcom.sun.jndi.cosnaming.object.trustURLCodebase=false"]
 
     def __init__(self, game_core: GameCore, launch_config: LaunchConfig) -> None:
-        self.game_core = game_core
-        self.launch_config = launch_config
+        self.game_core: GameCore = game_core
+        self.launch_config: LaunchConfig = launch_config
             
     def build(self) -> Iterable[str]:
         yield f'"{self.launch_config.jvm_config.java_path}"'
