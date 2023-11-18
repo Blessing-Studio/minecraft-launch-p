@@ -1,12 +1,13 @@
+import traceback
 from json import dumps, loads
 from shutil import move, rmtree
 from os.path import exists, abspath, join, isfile, isdir
 from os import makedirs, listdir
-from typing import Iterable
-import traceback
+from typing import Iterable, overload
 from minecraft_launch.modules.models.launch.game_core import GameCore
 from minecraft_launch.modules.parser.game_core_parser import GameCoreParser
 from minecraft_launch.modules.utils.extend_util import ExtendUtil
+
 
 
 class GameCoreUtil():
@@ -14,7 +15,7 @@ class GameCoreUtil():
         self.root = abspath(path)
         self.error_game_cores: list[(str, Exception)]
 
-    def get_game_core(self, id: str) -> GameCore:
+    def get_game_core(self, id: str) -> GameCore|None:
         core: GameCore = GameCore()
         for core in self.get_game_cores():
             if core.id == id:
@@ -101,5 +102,24 @@ class GameCoreUtil():
         directory: str = join(self.root, "versions", id)
         if(exists(directory)):
             rmtree(directory)
-        
-    
+
+    @overload
+    def __sub__(self, core: GameCore) -> None:...
+
+    @overload
+    def __sub__(self, id: str) -> None:...
+
+    def __sub__(self, x: GameCore|str) -> None:
+        if (type(x) is GameCore):
+            if (x != None):
+                self.delete(x.id)
+            else:
+                return "No such core"
+        elif(type(x) is str):
+            if ((core := self.get_game_core(x)) != None):
+                self.delete(core.id)
+            else:
+                return "No such core"
+        else:
+            raise TypeError("Core object must be GameCore object or ID(str)")
+            

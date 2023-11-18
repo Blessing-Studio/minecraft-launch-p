@@ -1,5 +1,6 @@
 from requests import get
-from json import loads
+
+
 
 class HttpUtil():
     @staticmethod

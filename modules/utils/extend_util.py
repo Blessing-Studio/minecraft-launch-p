@@ -1,7 +1,8 @@
 from json import dump, load
 from os import listdir, remove
-from os.path import isfile, isdir, join
+from os.path import isfile, isdir, join, exists, getsize
 from shutil import rmtree
+from typing import overload
 
 
 class ExtendUtil():
@@ -36,3 +37,27 @@ class ExtendUtil():
                 indent=2,
                 sort_keys=True,
                 ensure_ascii=False)
+            
+    @overload
+    @staticmethod
+    def verify(file: str, size: int) -> bool:...
+
+    @overload
+    @staticmethod
+    def verify(file: str, shal: str) -> bool:... 
+
+    @staticmethod
+    def verify(file: str, _s: int|str) -> bool:
+        if(type(_s) == int):
+            return exists(file) & (getsize(file) == _s)
+        elif(type(_s) == str):
+            if(not exists(file)):
+                return False
+            try:
+                ...
+            except:
+                return False
+            
+    @staticmethod
+    def __statement() -> str: 
+        return "此项目为 MinecraftLaunch 的 Python 版,负责人为 JustRainy,技术指导 YangSpring114"

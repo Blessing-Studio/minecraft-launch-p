@@ -3,7 +3,7 @@ import platform
 from asyncio import get_event_loop
 from os import remove, system, makedirs
 from os.path import join, exists, isfile
-from typing import Callable, Iterable, Any
+from typing import Callable, Iterable, Any, NoReturn
 from minecraft_launch.modules.arguments_builders.java_minecraft_arguments_builder import JavaMinecraftArgumentsBuilder
 from minecraft_launch.modules.enum.launch_state import LaunchState
 from minecraft_launch.modules.interface.launcher_base import LauncherBase
@@ -19,7 +19,8 @@ class JavaMinecraftLauncher(LauncherBase[JavaMinecraftArgumentsBuilder, Minecraf
     def __system_dict(self) -> dict[str, str]:
         return {"Windows": ".bat", "Darwin": ".sh", "Linux": ".sh"}
 
-    def __init__(self, launch_setting: LaunchConfig, game_core_toolkit: GameCoreUtil) -> None:
+    def __init__(self, launch_setting: LaunchConfig, game_core_toolkit: GameCoreUtil, call: bool = False) -> None:
+        self.call: bool = call
         self.launch_setting: LaunchConfig = launch_setting
         self.game_core_toolkit: GameCoreUtil = game_core_toolkit
 
@@ -76,7 +77,7 @@ class JavaMinecraftLauncher(LauncherBase[JavaMinecraftArgumentsBuilder, Minecraf
         remove(shell)
         return MinecraftLaunchResponse(LaunchState.Success, args)
     
-    async def __lang_switch_async(self, core: GameCore):
+    async def __lang_switch_async(self, core: GameCore) -> None:
         if(self.launch_setting.is_chinese):
             file_path = core.get_options_file_path()
 
@@ -89,3 +90,9 @@ class JavaMinecraftLauncher(LauncherBase[JavaMinecraftArgumentsBuilder, Minecraf
                 content = await f.read()
                 await f.seek(0)
                 await f.write(content.replace("lang:en_us", "lang:zh_cn"))
+
+    def __call__(self, id: str) -> MinecraftLaunchResponse|NoReturn:
+        if(self.call):
+            return self.launch(id)
+        else:
+            raise Exception("TypeError:\n\tJavaMinecraftLauncher object is not callable, did you forget to open 'call' mode?")

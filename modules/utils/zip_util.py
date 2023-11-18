@@ -5,6 +5,7 @@ from minecraft_launch.modules.utils.extend_util import ExtendUtil
 from minecraft_launch.modules.models.download.library_resource import LibraryResource
 
 
+
 class ZipUtil():
     @staticmethod
     def game_natives_decompress(directory: str, library_resources: list[LibraryResource]) -> None:

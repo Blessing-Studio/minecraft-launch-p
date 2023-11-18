@@ -1,7 +1,8 @@
 from os.path import join
+from minecraft_launch.modules.interface.iresource import IResource
 
 
-class LibraryResource():
+class LibraryResource(IResource):
     def __init__(self) -> None:
         self.root: str
         self.check_sum: str

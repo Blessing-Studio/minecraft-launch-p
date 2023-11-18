@@ -2,10 +2,9 @@ import platform
 
 
 class EnvironmentUtil():
-    (bit, linkage) = platform.architecture()
-    arch: str = "64" if bit == "64bit" else "32"
+    arch: str = "64" if platform.architecture()[0] == "64bit" else "32"
 
-    is_mac: bool = True if platform.system() == "Mac" else False
+    is_mac: bool = True if platform.system() == "Darwin" else False
     is_linux: bool = True if platform.system() == "Linux" else False
     is_windows: bool = True if platform.system() == "Windows" else False
 

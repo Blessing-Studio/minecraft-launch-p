@@ -23,7 +23,6 @@ class GameCoreInstaller(InstallerBase[InstallerResponse]):
             if(x.id == id):
                 self.core_info: GameCoreEntity = x
 
-
     @staticmethod
     def get_game_cores() -> GameCoresEntity:
         return GameCoresEntity(HttpUtil.get_str(APIManager.current.version_manifest))
